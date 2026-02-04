@@ -9,38 +9,32 @@ export default function ChatWindow() {
   const [loading, setLoading] = useState(false)
   const [userName, setUserName] = useState("there")
 
-  // 🔹 Fetch user name
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/me`, {
       credentials: "include",
     })
       .then(res => res.json())
       .then(data => {
-        if (data.authenticated) {
-          setUserName(data.user.name)
-        }
+        if (data.authenticated) setUserName(data.user.name)
       })
   }, [])
 
-  // 🔹 Initial greeting (runs once when username ready)
   useEffect(() => {
     setMessages([
       {
-        role: "ai",
+        role: "assistant",
         content: `Hi ${userName} 👋 I'm your AI Gmail assistant.
 
-You can say things like:
+You can say:
 • show my emails
 • reply to email 1
-• delete email from amazon
-• delete email number 2`,
+• delete email from amazon`,
       },
     ])
   }, [userName])
 
   const sendMessage = async (msg: string) => {
     setMessages(prev => [...prev, { role: "user", content: msg }])
-
     setLoading(true)
 
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/chat`, {
@@ -51,7 +45,6 @@ You can say things like:
     })
 
     const data = await res.json()
-
     setLoading(false)
 
     setMessages(prev => [
@@ -64,43 +57,14 @@ You can say things like:
     ])
   }
 
-  const handleAction = async (action: string, payload: any) => {
+  // ⭐ THIS IS THE FIX ⭐
+  const handleAction = async (action: string) => {
     if (action === "confirm_reply") {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/send-reply`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email_id: payload.email.id,
-          reply: payload.reply,
-        }),
-      })
-
-      setMessages(prev => [
-        ...prev,
-        {
-          role: "assistant",
-          content: "✅ Reply sent successfully!",
-        },
-      ])
+      await sendMessage("yes")
     }
 
     if (action === "confirm_delete") {
-      await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/emails/${payload.email.id}`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        }
-      )
-
-      setMessages(prev => [
-        ...prev,
-        {
-          role: "assistant",
-          content: "🗑️ Email deleted successfully!",
-        },
-      ])
+      await sendMessage("delete")
     }
   }
 
@@ -114,6 +78,10 @@ You can say things like:
             onAction={handleAction}
           />
         ))}
+
+        {loading && (
+          <div className="text-sm text-zinc-400">Thinking...</div>
+        )}
       </div>
 
       <CommandInput onSend={sendMessage} loading={loading} />
