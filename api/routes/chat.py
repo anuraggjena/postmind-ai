@@ -4,14 +4,14 @@ import base64
 from fastapi import APIRouter, Request
 from email.mime.text import MIMEText
 
-from api.services.gmail_service import (
+from services.gmail_service import (
     get_gmail_service,
     get_header,
     extract_body,
     build_email_map,
 )
-from api.services.ai_service import generate_reply
-from api.routes.emails import get_emails
+from services.ai_service import generate_reply
+from routes.emails import get_emails
 
 router = APIRouter()
 

@@ -1,11 +1,11 @@
 import os
 from fastapi import APIRouter, Request
-from api.services.gmail_service import (
+from services.gmail_service import (
     get_gmail_service,
     get_header,
     extract_body,
 )
-from api.services.ai_service import summarize_email
+from services.ai_service import summarize_email
 
 router = APIRouter()
 
