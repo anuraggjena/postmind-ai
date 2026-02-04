@@ -7,3 +7,4 @@ python-dotenv
 requests
 itsdangerous
 groq
+beautifulsoup4
