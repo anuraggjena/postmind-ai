@@ -1,0 +1,13 @@
+{
+  "web": {
+    "client_id": "759445841-nc1r4ni1023oni2u5t8065cih6ko7c3b.apps.googleusercontent.com",
+    "project_id": "postmind-ai",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "client_secret": "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",
+    "redirect_uris": [
+      "http://localhost:8000/api/auth/callback",
+      "https://postmind-ai.vercel.app/api/auth/callback"
+    ]
+  }
+}

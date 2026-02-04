@@ -1,36 +1,112 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Postmind AI — Intelligent Gmail Assistant
 
-## Getting Started
+Postmind AI is an AI-powered Gmail assistant that allows users to manage their inbox using natural language commands through a chat interface.
 
-First, run the development server:
+Users can:
+- View emails with AI summaries
+- Reply to emails with AI-generated responses
+- Delete emails by number, sender, or subject
+- Confirm actions before execution
+
+---
+
+## Live URL
+
+https://postmind-ai.vercel.app
+
+---
+
+## Tech Stack
+
+Frontend:
+- Next.js
+- Tailwind CSS
+- React
+
+Backend:
+- FastAPI
+- Gmail API
+- Google OAuth 2.0
+- Groq (LLaMA 3.1)
+- BeautifulSoup
+
+Deployment:
+- Vercel (Fullstack)
+
+---
+
+## Setup Instructions
+
+### Clone
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repo>
+cd postmind-ai
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Install Frontend
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cd client
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Run Backend
 
-## Learn More
+```bash
+cd api
+pip install -r requirements.txt
+uvicorn main:app --reload
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Google OAuth Setup
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Create OAuth Client (Web Application)
+2. Add Redirect URIs:
 
-## Deploy on Vercel
+```
+http://localhost:8000/api/auth/callback
+https://your-app-name.vercel.app/api/auth/callback
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. Place downloaded JSON at:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+api/google_client.json
+```
+
+---
+
+## Environment Variables (Vercel)
+
+```
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REDIRECT_URI=
+GROQ_API_KEY=
+SESSION_SECRET=
+```
+
+---
+
+## Supported Commands
+
+- show my emails
+- reply to email 1
+- delete email number 2
+- delete email from amazon
+- delete email with subject invoice
+
+System asks confirmation before delete or reply.
+
+---
+
+## Assumptions & Limitations
+
+- Works on latest 5–10 emails
+- Depends on Gmail API quotas
+- Requires valid Google OAuth credentials
+- Groq API key required for AI responses
