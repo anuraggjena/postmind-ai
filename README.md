@@ -195,6 +195,42 @@ npm run dev
 
 ---
 
+## 🔐 OAuth Test User Note (Important for Review)
+
+During development, Google OAuth requires all users to be explicitly added as Test Users in the Google Cloud Console when the app is in Testing mode.
+
+The assignment mentions adding:
+
+`test@gmail.com`
+
+However, Google does not allow adding this address because it is not an active Google account.
+
+As per the evaluation criteria, the reviewer account used for testing is:
+
+`testingcheckuser1234@gmail.com`
+
+This email has been added as a Test User in the Google Cloud OAuth configuration.
+
+What this means for the reviewer
+
+You can successfully:
+
+- Log in with `testingcheckuser1234@gmail.com`
+
+- View emails
+
+- Reply to emails
+
+- Delete emails
+
+without any OAuth restriction.
+
+If you wish to test with another account, simply add it as a Test User in:
+
+Google Cloud Console → APIs & Services → OAuth Consent Screen → Test Users
+
+---
+
 ## 🙌 Summary
 
 This project demonstrates:
