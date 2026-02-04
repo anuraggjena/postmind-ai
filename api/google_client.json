@@ -7,7 +7,7 @@
     "client_secret": "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",
     "redirect_uris": [
       "http://localhost:8000/api/auth/callback",
-      "https://postmind-ai.vercel.app/api/auth/callback"
+      "https://postmind-ai.onrender.com/api/auth/callback"
     ]
   }
 }

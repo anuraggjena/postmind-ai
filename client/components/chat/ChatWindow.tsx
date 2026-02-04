@@ -11,7 +11,7 @@ export default function ChatWindow() {
 
   // 🔹 Fetch user name
   useEffect(() => {
-    fetch("/api/me", {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/me`, {
       credentials: "include",
     })
       .then(res => res.json())
@@ -43,7 +43,7 @@ You can say things like:
 
     setLoading(true)
 
-    const res = await fetch("/api/chat", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/chat`, {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },

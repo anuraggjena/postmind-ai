@@ -7,7 +7,7 @@ export default function Sidebar() {
   const [emails, setEmails] = useState<any[]>([])
   
   useEffect(() => {
-    fetch("/api/emails", {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/emails`, {
       credentials: "include",
     })
       .then(res => res.json())
@@ -35,7 +35,7 @@ export default function Sidebar() {
             <button
               className="mt-3 text-red-400 flex items-center gap-1 text-sm"
               onClick={() =>
-                fetch(`/api/emails/${email.id}`, {
+                fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/emails/${email.id}`, {
                   method: "DELETE",
                   credentials: "include",
                 })

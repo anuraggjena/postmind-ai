@@ -66,7 +66,7 @@ async def callback(request: Request, code: str):
         }
     }
 
-    return RedirectResponse("http://localhost:3000/chat")
+    return RedirectResponse("https://postmind-ai.vercel.app/chat")
 
 
 

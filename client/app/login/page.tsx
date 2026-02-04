@@ -27,7 +27,7 @@ export default function LoginPage() {
           </div>
 
           <a
-            href="https://postmind-ai.vercel.app/api/auth/login"
+            href="https://postmind-ai.onrender.com/api/auth/login"
             className="w-full flex items-center justify-center gap-3 bg-white text-black font-medium py-3 rounded-lg hover:scale-105 transition-transform"
           >
             <Mail className="w-5 h-5" />

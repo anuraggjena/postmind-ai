@@ -21,7 +21,10 @@ print("GOOGLE_CLIENT_ID:", os.getenv("GOOGLE_CLIENT_ID"))
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "https://postmind-ai.vercel.app"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -29,7 +32,7 @@ app.add_middleware(
 
 app.add_middleware(
     SessionMiddleware,
-    secret_key="super-secret-key",
+    secret_key="6D7a9uXFqY8wR4vP2cN9kL7jB1mH5gT3",
     same_site="lax",
     https_only=False,
 )
