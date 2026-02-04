@@ -66,11 +66,41 @@ You can say things like:
 
   const handleAction = async (action: string, payload: any) => {
     if (action === "confirm_reply") {
-      await sendMessage("yes send it")
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/send-reply`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email_id: payload.email.id,
+          reply: payload.reply,
+        }),
+      })
+
+      setMessages(prev => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "✅ Reply sent successfully!",
+        },
+      ])
     }
 
     if (action === "confirm_delete") {
-      await sendMessage("yes delete it")
+      await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/emails/${payload.email.id}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      )
+
+      setMessages(prev => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "🗑️ Email deleted successfully!",
+        },
+      ])
     }
   }
 

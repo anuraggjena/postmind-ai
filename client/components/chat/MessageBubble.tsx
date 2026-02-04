@@ -60,12 +60,7 @@ export default function MessageBubble({ message, onAction }: Props) {
             </div>
 
             <button
-              onClick={() =>
-                onAction?.("confirm_reply", {
-                  reply: message.reply,
-                  subject: message.original_subject,
-                })
-              }
+              onClick={() => onAction?.("confirm_reply", message)}
               className="mt-2 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm"
             >
               Send this reply
@@ -85,9 +80,7 @@ export default function MessageBubble({ message, onAction }: Props) {
             </div>
 
             <button
-              onClick={() =>
-                onAction?.("confirm_delete", message.email)
-              }
+              onClick={() => onAction?.("confirm_delete", message)}
               className="mt-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm"
             >
               Confirm delete
