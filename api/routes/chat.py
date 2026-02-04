@@ -8,40 +8,46 @@ from services.gmail_service import (
     get_gmail_service,
     get_header,
     extract_body,
-    build_email_map,
 )
 from services.ai_service import generate_reply
 from routes.emails import get_emails
 
 router = APIRouter()
 
-CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
-CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 
-def send_email(service, to, subject, body):
+# REAL Gmail reply (threaded)
+def send_reply(service, to, subject, body, thread_id, message_id):
     msg = MIMEText(body)
+
     msg["to"] = to
     msg["subject"] = subject
+    msg["In-Reply-To"] = message_id
+    msg["References"] = message_id
+
     raw = base64.urlsafe_b64encode(msg.as_bytes()).decode()
-    service.users().messages().send(userId="me", body={"raw": raw}).execute()
+
+    service.users().messages().send(
+        userId="me",
+        body={
+            "raw": raw,
+            "threadId": thread_id,
+        },
+    ).execute()
 
 
 def find_email(emails, text):
-    # by number
     num = re.search(r"\d+", text)
     if num:
         idx = int(num.group()) - 1
         if 0 <= idx < len(emails):
             return emails[idx]
 
-    # by sender
     if "from" in text:
         sender_key = text.split("from")[-1].strip()
         for e in emails:
             if sender_key in e["from"].lower():
                 return e
 
-    # by subject keyword
     for e in emails:
         if any(word in e["subject"].lower() for word in text.split()):
             return e
@@ -62,20 +68,25 @@ async def chat(request: Request):
     # CONFIRMATION HANDLER
     if pending:
         if msg in ["yes", "confirm", "ok", "send", "delete"]:
+
             if pending["type"] == "delete":
                 service.users().messages().trash(
                     userId="me", id=pending["email_id"]
                 ).execute()
+
                 request.session.pop("pending_action")
                 return {"type": "text", "data": "Email deleted successfully."}
 
             if pending["type"] == "reply":
-                send_email(
+                send_reply(
                     service,
                     pending["to"],
                     pending["subject"],
                     pending["reply"],
+                    pending["thread_id"],
+                    pending["message_id"],
                 )
+
                 request.session.pop("pending_action")
                 return {"type": "text", "data": "Reply sent successfully."}
 
@@ -87,16 +98,9 @@ async def chat(request: Request):
     data = await get_emails(request)
     emails = data["emails"]
 
-    # SHOW
+    # SHOW EMAILS
     if "show" in msg:
         return {"type": "emails", "data": emails}
-
-    if "from" in msg:
-        sender = msg.split("from")[-1].strip()
-        # find latest email from sender
-
-    if "subject" in msg:
-        keyword = msg.split("subject")[-1].strip()
 
     # DELETE FLOW
     if "delete" in msg:
@@ -129,15 +133,21 @@ Type YES to confirm.""",
             userId="me", id=email["id"]
         ).execute()
 
+        thread_id = msg_data["threadId"]
+        message_id = get_header(
+            msg_data["payload"]["headers"], "Message-ID"
+        )
+
         content = extract_body(msg_data["payload"])
         reply_text = generate_reply(content, user["name"])
 
         request.session["pending_action"] = {
             "type": "reply",
-            "email_id": email["id"],
             "to": email["from"],
             "subject": f"Re: {email['subject']}",
             "reply": reply_text,
+            "thread_id": thread_id,
+            "message_id": message_id,
         }
 
         return {
