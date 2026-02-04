@@ -57,7 +57,6 @@ You can say:
     ])
   }
 
-  // ⭐ THIS IS THE FIX ⭐
   const handleAction = async (action: string) => {
     if (action === "confirm_reply") {
       await sendMessage("yes")
