@@ -18,7 +18,6 @@ router = APIRouter()
 CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 
-
 def send_email(service, to, subject, body):
     msg = MIMEText(body)
     msg["to"] = to
@@ -60,7 +59,7 @@ async def chat(request: Request):
 
     pending = request.session.get("pending_action")
 
-    # ---------- CONFIRMATION HANDLER ----------
+    # CONFIRMATION HANDLER
     if pending:
         if msg in ["yes", "confirm", "ok", "send", "delete"]:
             if pending["type"] == "delete":
@@ -84,11 +83,11 @@ async def chat(request: Request):
             request.session.pop("pending_action")
             return {"type": "text", "data": "Action cancelled."}
 
-    # ---------- FETCH EMAILS ----------
+    # FETCH EMAILS
     data = await get_emails(request)
     emails = data["emails"]
 
-    # ---------- SHOW ----------
+    # SHOW
     if "show" in msg:
         return {"type": "emails", "data": emails}
 
@@ -99,7 +98,7 @@ async def chat(request: Request):
     if "subject" in msg:
         keyword = msg.split("subject")[-1].strip()
 
-    # ---------- DELETE FLOW ----------
+    # DELETE FLOW
     if "delete" in msg:
         email = find_email(emails, msg)
         if not email:
@@ -120,7 +119,7 @@ Subject: {email['subject']}
 Type YES to confirm.""",
         }
 
-    # ---------- REPLY FLOW ----------
+    # REPLY FLOW
     if "reply" in msg:
         email = find_email(emails, msg)
         if not email:

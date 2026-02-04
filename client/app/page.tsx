@@ -1,17 +1,13 @@
 import Link from "next/link";
 import ParticlesBackground from "@/components/ParticlesBackground";
-import { ArrowRight } from "lucide-react";
 
 export default function Landing() {
   return (
     <main className="relative min-h-screen bg-black text-white overflow-hidden">
-      {/* Stars background */}
       <ParticlesBackground />
 
-      {/* Purple glow */}
       <div className="absolute top-40 left-1/2 -translate-x-1/2 w-150 h-150 bg-purple-600/30 blur-[180px] rounded-full" />
 
-      {/* Navbar */}
       <nav className="relative z-10 flex items-center justify-between px-10 py-6">
         <h1 className="text-xl font-bold tracking-wide">Postmind AI</h1>
         <div className="flex gap-8 text-sm text-gray-300">
@@ -24,7 +20,6 @@ export default function Landing() {
         </div>
       </nav>
 
-      {/* Hero */}
       <section className="relative z-10 flex flex-col items-center text-center mt-30 px-6">
         <div className="mb-6 text-sm bg-white/10 border border-white/20 px-4 py-1 rounded-full backdrop-blur">
           ✨ AI Powered Gmail Assistant
@@ -44,7 +39,7 @@ export default function Landing() {
             href="/login"
             className="bg-purple-600 px-8 rounded-lg text-white font-bold hover:bg-purple-700 transition"
           >
-            Get Started <ArrowRight />
+            Get Started
           </Link>
         </div>
       </section>

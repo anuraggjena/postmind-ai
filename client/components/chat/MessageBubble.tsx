@@ -25,14 +25,14 @@ export default function MessageBubble({ message, onAction }: Props) {
             : "bg-zinc-900 text-zinc-200 border border-zinc-800"}
         `}
       >
-        {/* ---------- TEXT MESSAGE ---------- */}
+        {/* TEXT MESSAGE */}
         {typeof message.content === "string" && (
           <p className="whitespace-pre-wrap text-sm leading-relaxed">
             {message.content}
           </p>
         )}
 
-        {/* ---------- EMAIL LIST ---------- */}
+        {/* EMAIL LIST */}
         {message.type === "emails" && (
           <div className="space-y-3">
             {message.emails.map((e: any, i: number) => (
@@ -48,7 +48,7 @@ export default function MessageBubble({ message, onAction }: Props) {
           </div>
         )}
 
-        {/* ---------- REPLY PREVIEW ---------- */}
+        {/* REPLY PREVIEW */}
         {message.type === "reply_preview" && (
           <div className="space-y-3">
             <p className="text-xs text-zinc-400">
@@ -73,7 +73,7 @@ export default function MessageBubble({ message, onAction }: Props) {
           </div>
         )}
 
-        {/* ---------- DELETE CONFIRMATION ---------- */}
+        {/* DELETE CONFIRMATION */}
         {message.type === "confirm_delete" && (
           <div className="space-y-3">
             <p className="text-sm">
@@ -95,7 +95,7 @@ export default function MessageBubble({ message, onAction }: Props) {
           </div>
         )}
 
-        {/* ---------- TIMESTAMP ---------- */}
+        {/* TIMESTAMP */}
         {message.time && (
           <p className="text-[10px] text-zinc-500 mt-2 text-right">
             {new Date(message.time).toLocaleTimeString()}

@@ -11,7 +11,6 @@ export default function LoginPage() {
       <div className="relative z-10 w-full max-w-md px-6">
         <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-10 shadow-2xl">
 
-          {/* Header */}
           <div className="flex flex-col items-center mb-6">
             <div className="bg-purple-600/20 p-3 rounded-full mb-4">
               <Sparkles className="w-6 h-6 text-white" />
@@ -27,7 +26,6 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Google Login Button */}
           <a
             href="https://postmind-ai.vercel.app/api/auth/login"
             className="w-full flex items-center justify-center gap-3 bg-white text-black font-medium py-3 rounded-lg hover:scale-105 transition-transform"
@@ -36,7 +34,6 @@ export default function LoginPage() {
             Continue with Google
           </a>
 
-          {/* Trust footer */}
           <div className="flex items-center justify-center gap-2 mt-6 text-xs text-gray-500">
             <ShieldCheck className="w-4 h-4" />
             Secure OAuth. No emails stored.
