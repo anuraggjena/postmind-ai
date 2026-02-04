@@ -6,9 +6,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
-from api.routes.auth import router as auth_router
-from api.routes.emails import router as emails_router
-from api.routes.chat import router as chat_router
+from routes.auth import router as auth_router
+from routes.emails import router as emails_router
+from routes.chat import router as chat_router
 
 print("RUNNING THIS MAIN:", __file__)
 
