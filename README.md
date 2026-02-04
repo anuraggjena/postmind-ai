@@ -1,78 +1,148 @@
-# Postmind AI — Intelligent Gmail Assistant
+# 🧠 AI Gmail Assistant — Assignment Submission
 
-Postmind AI is an AI-powered Gmail assistant that allows users to manage their inbox using natural language commands through a chat interface.
+A modern AI-powered Gmail assistant built with **FastAPI** and **Next.js** that allows users to:
 
-Users can:
-- View emails with AI summaries
-- Reply to emails with AI-generated responses
-- Delete emails by number, sender, or subject
-- Confirm actions before execution
+* View summarized emails
+* Generate AI replies
+* Delete emails using natural language
+* Confirm actions before execution
+* Interact through a modern chatbot interface
 
----
+The assistant understands commands like:
 
-## Live URL
-
-https://postmind-ai.vercel.app
-
----
-
-## Tech Stack
-
-Frontend:
-- Next.js
-- Tailwind CSS
-- React
-
-Backend:
-- FastAPI
-- Gmail API
-- Google OAuth 2.0
-- Groq (LLaMA 3.1)
-- BeautifulSoup
-
-Deployment:
-- Vercel (Fullstack)
-
----
-
-## Setup Instructions
-
-### Clone
-
-```bash
-git clone <repo>
-cd postmind-ai
 ```
-
-### Install Frontend
-
-```bash
-cd client
-npm install
-npm run dev
-```
-
-### Run Backend
-
-```bash
-cd api
-pip install -r requirements.txt
-uvicorn main:app --reload
+show my emails
+reply to email 2
+delete email from amazon
+delete email number 3
 ```
 
 ---
 
-## Google OAuth Setup
+## 🌐 Live Demo
 
-1. Create OAuth Client (Web Application)
-2. Add Redirect URIs:
+**Frontend (Vercel)**
+👉 [https://postmind-ai.vercel.app](https://postmind-ai.vercel.app)
+
+**Backend (Render)**
+👉 [https://postmind-ai.onrender.com](https://postmind-ai.onrender.com)
+
+---
+
+## 🧱 Tech Stack
+
+| Layer        | Technology                                         |
+| ------------ | -------------------------------------------------- |
+| Frontend     | Next.js 15 (App Router), TailwindCSS, Lucide React |
+| Backend      | FastAPI, Uvicorn                                   |
+| Gmail Access | Google OAuth2 + Gmail API                          |
+| AI           | Groq (Llama 3.1)                                   |
+| HTML Parsing | BeautifulSoup                                      |
+| Session Auth | Starlette Session Middleware                       |
+| Hosting      | Vercel (frontend), Render (backend)                |
+
+---
+
+## ✨ Features Implemented
+
+### ✅ Email Listing
+
+* Fetches latest inbox emails
+* Extracts clean body from MIME
+* AI summarizes each email
+* Sidebar preview with loading states
+
+### ✅ Smart Delete (as required)
+
+User can delete emails:
+
+* By sender → *“delete latest email from amazon”*
+* By subject keyword
+* By number → *“delete email number 2”*
+
+Flow:
+
+1. Bot asks for confirmation
+2. On confirmation → deletes from Gmail
+3. Bot reports success/failure
+
+### ✅ Smart Reply (as required)
+
+1. Bot generates AI reply tied to the original email
+2. Shows reply to user
+3. Asks for confirmation
+4. Sends via Gmail on confirmation
+5. Reports success/failure
+
+### ✅ Modern Chat UI
+
+* Full width responsive chat
+* Message bubbles
+* Sidebar inbox preview
+* Loading states
+* User name greeting
+
+---
+
+## 🗂 Project Structure
 
 ```
-http://localhost:8000/api/auth/callback
-https://your-app-name.vercel.app/api/auth/callback
+root/
+│
+├── client/                 # Next.js frontend
+│
+├── api/
+│   ├── main.py             # FastAPI entry
+│   ├── routes/
+│   │   ├── auth.py
+│   │   ├── emails.py
+│   │   └── chat.py
+│   └── services/
+│       ├── gmail_service.py
+│       └── ai_service.py
+│
+├── requirements.txt
+└── README.md
 ```
 
-3. Place downloaded JSON at:
+---
+
+## ⚙️ Environment Variables
+
+### Backend (.env on Render)
+
+```
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+GROQ_API_KEY=...
+SESSION_SECRET=super-secret-key
+FRONTEND_URL=https://your-app-name.vercel.app
+```
+
+### Frontend (.env.local on Vercel)
+
+```
+NEXT_PUBLIC_API_URL=https://your-backend-name.onrender.com
+```
+
+---
+
+## 🔐 Google OAuth & Gmail Setup
+
+1. Go to Google Cloud Console
+2. Create OAuth 2.0 credentials (Web Application)
+3. Add Authorized Redirect URI:
+
+```
+https://your-backend-name.onrender.com/api/auth/callback
+```
+
+4. Enable APIs:
+
+   * Gmail API
+   * Google OAuth2 API
+
+5. Download the OAuth JSON and place it at:
 
 ```
 api/google_client.json
@@ -80,33 +150,61 @@ api/google_client.json
 
 ---
 
-## Environment Variables (Vercel)
+## 🖥 Running Locally
 
+### Backend
+
+```bash
+pip install -r requirements.txt
+uvicorn api.main:app --reload
 ```
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-GOOGLE_REDIRECT_URI=
-GROQ_API_KEY=
-SESSION_SECRET=
+
+### Frontend
+
+```bash
+cd client
+npm install
+npm run dev
 ```
 
 ---
 
-## Supported Commands
+## 📌 Assumptions & Limitations
 
-- show my emails
-- reply to email 1
-- delete email number 2
-- delete email from amazon
-- delete email with subject invoice
-
-System asks confirmation before delete or reply.
+* Works on latest emails (default: 5–10)
+* Session based auth (not JWT)
+* Requires Gmail OAuth each session expiry
+* Designed for demonstration scale, not production scale
+* Email parsing depends on MIME structure of Gmail messages
 
 ---
 
-## Assumptions & Limitations
+## 🎯 Assignment Requirements Coverage
 
-- Works on latest 5–10 emails
-- Depends on Gmail API quotas
-- Requires valid Google OAuth credentials
-- Groq API key required for AI responses
+| Requirement                | Status |
+| -------------------------- | ------ |
+| Delete by sender           | ✅      |
+| Delete by subject          | ✅      |
+| Delete by number           | ✅      |
+| Confirmation before delete | ✅      |
+| AI reply generation        | ✅      |
+| Confirmation before reply  | ✅      |
+| Report success/failure     | ✅      |
+| Modern chatbot UI          | ✅      |
+| Loading states             | ✅      |
+
+---
+
+## 🙌 Summary
+
+This project demonstrates:
+
+* Real Gmail integration
+* Natural language command parsing
+* AI-assisted email workflow
+* Clean full-stack architecture
+* Production style deployment (Vercel + Render)
+
+---
+
+**Built by:** Anurag Jena

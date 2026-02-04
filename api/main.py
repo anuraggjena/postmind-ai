@@ -33,8 +33,8 @@ app.add_middleware(
 app.add_middleware(
     SessionMiddleware,
     secret_key="6D7a9uXFqY8wR4vP2cN9kL7jB1mH5gT3",
-    same_site="lax",
-    https_only=False,
+    same_site="none",
+    https_only=True,
 )
 
 app.include_router(auth_router)
