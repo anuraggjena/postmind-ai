@@ -37,7 +37,7 @@ export default function Landing() {
         <div className="mt-12 flex">
           <Link
             href="/login"
-            className="bg-purple-600 px-8 rounded-lg text-white font-bold hover:bg-purple-700 transition"
+            className="bg-purple-600 px-8 py-4 rounded-lg text-white font-bold hover:bg-purple-700 transition"
           >
             Get Started
           </Link>
