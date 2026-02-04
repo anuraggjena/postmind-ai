@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 
 type Props = {
   message: any;
-  onAction?: (action: string, payload?: any) => void;
+  onAction?: (action: string) => void;
 };
 
 export default function MessageBubble({ message, onAction }: Props) {
@@ -25,17 +25,24 @@ export default function MessageBubble({ message, onAction }: Props) {
             : "bg-zinc-900 text-zinc-200 border border-zinc-800"}
         `}
       >
-        {/* TEXT MESSAGE */}
-        {typeof message.content === "string" && (
+        {/* USER TEXT */}
+        {isUser && (
           <p className="whitespace-pre-wrap text-sm leading-relaxed">
             {message.content}
+          </p>
+        )}
+
+        {/* NORMAL ASSISTANT TEXT */}
+        {message.type === "text" && (
+          <p className="whitespace-pre-wrap text-sm leading-relaxed">
+            {message.data}
           </p>
         )}
 
         {/* EMAIL LIST */}
         {message.type === "emails" && (
           <div className="space-y-3">
-            {message.emails.map((e: any, i: number) => (
+            {message.data.map((e: any, i: number) => (
               <div
                 key={i}
                 className="p-3 rounded-lg bg-zinc-800 border border-zinc-700"
@@ -52,11 +59,14 @@ export default function MessageBubble({ message, onAction }: Props) {
         {message.type === "reply_preview" && (
           <div className="space-y-3">
             <p className="text-xs text-zinc-400">
-              Reply to: <span className="text-zinc-200">{message.original_subject}</span>
+              Reply to:{" "}
+              <span className="text-zinc-200">
+                {message.data.original_subject}
+              </span>
             </p>
 
             <div className="p-3 rounded-lg bg-zinc-800 border border-zinc-700 text-sm whitespace-pre-wrap">
-              {message.reply}
+              {message.data.reply}
             </div>
 
             <button
@@ -68,32 +78,20 @@ export default function MessageBubble({ message, onAction }: Props) {
           </div>
         )}
 
-        {/* DELETE CONFIRMATION */}
+        {/* DELETE CONFIRMATION TEXT */}
         {message.type === "confirm_delete" && (
-          <div className="space-y-3">
-            <p className="text-sm">
-              Delete email:
-            </p>
-            <div className="p-3 rounded-lg bg-zinc-800 border border-zinc-700">
-              <p className="font-semibold text-sm">{message.email.subject}</p>
-              <p className="text-xs text-zinc-400">{message.email.from}</p>
-            </div>
-
-            <button
-              onClick={() => onAction?.("confirm_delete")}
-              className="mt-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm"
-            >
-              Confirm delete
-            </button>
-          </div>
+          <button
+            onClick={() => onAction?.("confirm_delete")}
+            className="mt-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm"
+          >
+            Confirm delete
+          </button>
         )}
 
-        {/* TIMESTAMP */}
-        {message.time && (
-          <p className="text-[10px] text-zinc-500 mt-2 text-right">
-            {new Date(message.time).toLocaleTimeString()}
-          </p>
-        )}
+        {/* TIME */}
+        <p className="text-[10px] text-zinc-500 mt-2 text-right">
+          {new Date(message.time).toLocaleTimeString()}
+        </p>
       </div>
     </motion.div>
   );

@@ -9,6 +9,7 @@ export default function ChatWindow() {
   const [loading, setLoading] = useState(false)
   const [userName, setUserName] = useState("there")
 
+  // Fetch user
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/me`, {
       credentials: "include",
@@ -19,22 +20,29 @@ export default function ChatWindow() {
       })
   }, [])
 
+  // Initial greeting
   useEffect(() => {
     setMessages([
       {
         role: "assistant",
-        content: `Hi ${userName} 👋 I'm your AI Gmail assistant.
+        type: "text",
+        data: `Hi ${userName} 👋 I'm your AI Gmail assistant.
 
 You can say:
 • show my emails
 • reply to email 1
 • delete email from amazon`,
+        time: Date.now(),
       },
     ])
   }, [userName])
 
   const sendMessage = async (msg: string) => {
-    setMessages(prev => [...prev, { role: "user", content: msg }])
+    setMessages(prev => [
+      ...prev,
+      { role: "user", content: msg, time: Date.now() },
+    ])
+
     setLoading(true)
 
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/chat`, {
@@ -52,7 +60,8 @@ You can say:
       {
         role: "assistant",
         type: data.type,
-        ...data.data,
+        data: data.data,
+        time: Date.now(),
       },
     ])
   }
@@ -63,7 +72,7 @@ You can say:
     }
 
     if (action === "confirm_delete") {
-      await sendMessage("delete")
+      await sendMessage("yes")
     }
   }
 
