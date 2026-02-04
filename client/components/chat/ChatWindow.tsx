@@ -57,9 +57,9 @@ You can say things like:
     setMessages(prev => [
       ...prev,
       {
-        role: "ai",
+        role: "assistant",
         type: data.type,
-        content: data.data,
+        ...data.data,
       },
     ])
   }
