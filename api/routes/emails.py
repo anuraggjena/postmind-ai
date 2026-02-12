@@ -22,14 +22,10 @@ async def get_emails(request: Request, unread: bool = False):
 
     service = get_gmail_service(user)
 
-    query = None
-    if unread:
-        query = "in:inbox is:unread category:primary"
-
     res = service.users().messages().list(
         userId="me",
         maxResults=10,
-        q=query,
+        q="in:inbox is:unread category:primary",
     ).execute()
 
     output = []
