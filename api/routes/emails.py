@@ -24,12 +24,11 @@ async def get_emails(request: Request, unread: bool = False):
 
     query = None
     if unread:
-        query = "is:unread category:primary"
+        query = "in:inbox is:unread category:primary"
 
     res = service.users().messages().list(
         userId="me",
         maxResults=5,
-        labelIds=["INBOX"],
         q=query,
     ).execute()
 
