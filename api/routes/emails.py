@@ -21,7 +21,7 @@ async def get_emails(request: Request):
     res = service.users().messages().list(
         userId="me",
         maxResults=10,
-        labelIds=["INBOX", "CATEGORY_UPDATES"],
+        q = "in:inbox category:primary",
     ).execute()
 
     output = []

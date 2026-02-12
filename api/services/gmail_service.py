@@ -58,7 +58,7 @@ def build_email_map(service, limit=10):
     res = service.users().messages().list(
         userId="me",
         maxResults=limit,
-        labelIds=["INBOX", "CATEGORY_UPDATES"],
+        q = "in:inbox category:primary",
     ).execute()
 
     email_map = {}
