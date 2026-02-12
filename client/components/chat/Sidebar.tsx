@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 export default function Sidebar() {
   const [emails, setEmails] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchEmails = async () => {
     setLoading(true);
@@ -14,9 +15,13 @@ export default function Sidebar() {
         `${process.env.NEXT_PUBLIC_API_URL}/api/emails`,
         { credentials: "include" }
       );
+
+      if (!res.ok) throw new Error("Failed to fetch");
+
       const data = await res.json();
       setEmails(data.emails || []);
-    } catch (e) {
+    } catch (err) {
+      console.error("Fetch emails error:", err);
       setEmails([]);
     }
     setLoading(false);
@@ -25,7 +30,6 @@ export default function Sidebar() {
   useEffect(() => {
     fetchEmails();
 
-    // 🔥 Listen for refresh event from ChatWindow
     const refreshHandler = () => {
       fetchEmails();
     };
@@ -38,15 +42,36 @@ export default function Sidebar() {
   }, []);
 
   const deleteEmail = async (id: string) => {
-    await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/emails/${id}`,
-      {
-        method: "DELETE",
-        credentials: "include",
-      }
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this email?"
     );
 
-    fetchEmails(); // refresh after sidebar delete
+    if (!confirmDelete) return;
+
+    try {
+      setDeletingId(id);
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/emails/${id}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
+
+      if (!res.ok) throw new Error("Delete failed");
+
+      // Remove instantly from UI (fast UX)
+      setEmails((prev) => prev.filter((e) => e.id !== id));
+
+      // Optional: also trigger global refresh event
+      window.dispatchEvent(new Event("refreshEmails"));
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert("Failed to delete email.");
+    }
+
+    setDeletingId(null);
   };
 
   return (
@@ -57,6 +82,7 @@ export default function Sidebar() {
       </div>
 
       <div className="space-y-4">
+        {/* Loading Skeleton */}
         {loading &&
           [1, 2, 3, 4].map((i) => (
             <div
@@ -70,12 +96,14 @@ export default function Sidebar() {
             </div>
           ))}
 
+        {/* Empty State */}
         {!loading && emails.length === 0 && (
           <div className="text-neutral-500 text-sm">
             No emails found.
           </div>
         )}
 
+        {/* Email List */}
         {!loading &&
           emails.map((email, i) => (
             <div
@@ -88,10 +116,12 @@ export default function Sidebar() {
               <p className="text-sm mt-2">{email.summary}</p>
 
               <button
-                className="mt-3 text-red-400 flex items-center gap-1 text-sm"
+                disabled={deletingId === email.id}
+                className="mt-3 text-red-400 flex items-center gap-1 text-sm disabled:opacity-50"
                 onClick={() => deleteEmail(email.id)}
               >
-                <Trash2 size={14} /> Delete
+                <Trash2 size={14} />
+                {deletingId === email.id ? "Deleting..." : "Delete"}
               </button>
             </div>
           ))}

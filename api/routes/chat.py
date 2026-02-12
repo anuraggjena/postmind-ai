@@ -40,11 +40,15 @@ def send_reply(service, to, subject, body, thread_id, message_id):
 # Helper: Find Email
 # -------------------------
 def find_email(emails, text):
+
     num = re.search(r"\d+", text)
     if num:
         idx = int(num.group()) - 1
-        if 0 <= idx < len(emails):
-            return emails[idx]
+
+        if idx < 0 or idx >= len(emails):
+            return None   # 🚨 STRICT STOP
+
+        return emails[idx]
 
     if "from" in text:
         sender_key = text.split("from")[-1].strip()
@@ -57,6 +61,7 @@ def find_email(emails, text):
             return e
 
     return None
+
 
 
 # -------------------------
@@ -156,6 +161,14 @@ Try saying: 'show emails' or 'reply to email 1'."""
     # SHOW EMAILS
     # -------------------------
     if "show" in msg:
+        if msg.startswith("show"):
+            if "email" in msg:
+                return {"type": "emails", "data": emails}
+            else:
+                return {
+                    "type": "text",
+                    "data": "I can only show emails. Try 'show emails'."
+                }
         num = re.search(r"\d+", msg)
         if num:
             count = int(num.group())

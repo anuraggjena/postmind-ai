@@ -46,3 +46,18 @@ async def get_emails(request: Request):
         )
 
     return {"emails": output}
+
+@router.delete("/api/emails/{email_id}")
+async def delete_email(email_id: str, request: Request):
+    user = request.session.get("user")
+    if not user:
+        return {"status": "error", "message": "Not authenticated"}
+
+    service = get_gmail_service(user)
+
+    service.users().messages().trash(
+        userId="me",
+        id=email_id
+    ).execute()
+
+    return {"status": "deleted"}
