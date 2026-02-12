@@ -28,7 +28,7 @@ async def get_emails(request: Request, unread: bool = False):
 
     res = service.users().messages().list(
         userId="me",
-        maxResults=5,
+        maxResults=10,
         q=query,
     ).execute()
 
