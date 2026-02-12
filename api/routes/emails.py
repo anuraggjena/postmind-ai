@@ -21,7 +21,7 @@ async def get_emails(request: Request, unread: bool = False):
     res = service.users().messages().list(
         userId="me",
         maxResults=10,
-        q = "in:inbox is:unread -category:promotions -category:social -category:updates",
+        q = "in:inbox is:unread category:primary -category:promotions -category:social -category:updates",
     ).execute()
 
     output = []
