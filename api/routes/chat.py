@@ -14,12 +14,11 @@ from routes.emails import get_emails
 router = APIRouter()
 
 
-# -------------------------
-# Proper Gmail Threaded Reply
-# -------------------------
+# ---------------------------------------------------
+# Threaded Gmail Reply
+# ---------------------------------------------------
 def send_reply(service, to, subject, body, thread_id, message_id):
     msg = MIMEText(body)
-
     msg["to"] = to
     msg["subject"] = subject
     msg["In-Reply-To"] = message_id
@@ -36,17 +35,22 @@ def send_reply(service, to, subject, body, thread_id, message_id):
     ).execute()
 
 
-# -------------------------
-# Helper: Find Email
-# -------------------------
-def find_email(request, text):
-    emails = request.session.get("last_emails", [])
+# ---------------------------------------------------
+# Helpers
+# ---------------------------------------------------
+def extract_email_address(sender):
+    match = re.search(r"<(.+?)>", sender)
+    return match.group(1) if match else sender
 
+
+def find_email(request: Request, text: str):
+    emails = request.session.get("last_emails", [])
     if not emails:
         return None
 
+    text = text.lower()
+
     if "that" in text or "this" in text:
-        # use last referenced email
         return request.session.get("last_selected_email")
 
     if "latest" in text or "last" in text:
@@ -70,14 +74,10 @@ def find_email(request, text):
 
     return None
 
-def extract_email_address(sender):
-    match = re.search(r"<(.+?)>", sender)
-    return match.group(1) if match else sender
 
-
-# -------------------------
+# ---------------------------------------------------
 # Chat Endpoint
-# -------------------------
+# ---------------------------------------------------
 @router.post("/api/chat")
 async def chat(request: Request):
 
@@ -90,40 +90,14 @@ async def chat(request: Request):
     body = await request.json()
     msg = body.get("message", "").strip().lower()
 
-    # -------------------------
-    # Basic Greetings
-    # -------------------------
-    if msg in ["hi", "hii", "hello", "hey", "good morning", "good evening"]:
-        return {
-            "type": "text",
-            "data": f"Hey {user['name']} 👋 How can I help you with your emails today?"
-        }
-
-    # -------------------------
-    # Help
-    # -------------------------
-    if "help" in msg or "what can you do" in msg:
-        return {
-            "type": "text",
-            "data": """Here’s what I can help you with:
-
-            • Show your latest emails  
-            • Reply to any email  
-            • Delete emails by number, sender, or subject  
-            • Summarize emails  
-
-            Just tell me what you'd like to do."""
-        }
-
-    # -------------------------
-    # Confirmation Handling
-    # -------------------------
+    # =================================================
+    # 1️⃣ CONFIRMATION HANDLER (ALWAYS FIRST)
+    # =================================================
     pending = request.session.get("pending_action")
 
     if pending:
-        if msg in ["yes", "confirm", "ok", "send", "delete"]:
+        if msg in ["yes", "y", "confirm", "ok"]:
 
-            # DELETE CONFIRM
             if pending["type"] == "delete":
                 service.users().messages().trash(
                     userId="me",
@@ -132,29 +106,12 @@ async def chat(request: Request):
 
                 request.session.pop("pending_action")
 
-                updated = await get_emails(request)
-                request.session["last_emails"] = updated["emails"]
-
                 return {
-                    "type": "emails",
-                    "data": updated["emails"]
+                    "type": "text",
+                    "data": "🗑️ Email deleted successfully."
                 }
 
-            # REPLY CONFIRM
             if pending["type"] == "reply":
-
-                if msg.startswith("edit"):
-                    new_reply = generate_reply(msg, user["name"])
-                    pending["reply"] = new_reply
-                    request.session["pending_action"] = pending
-
-                    return {
-                        "type": "reply_preview",
-                        "data": {
-                            "original_subject": pending["subject"],
-                            "reply": new_reply,
-                        },
-                    }
                 send_reply(
                     service,
                     pending["to"],
@@ -175,38 +132,69 @@ async def chat(request: Request):
             request.session.pop("pending_action")
             return {
                 "type": "text",
-                "data": "Action cancelled."
+                "data": "❌ Action cancelled."
             }
 
-    # -------------------------
-    # Fetch Emails Only When Needed
-    # -------------------------
+    # =================================================
+    # 2️⃣ BASIC COMMANDS
+    # =================================================
+    if msg in ["hi", "hello", "hey", "good morning", "good evening"]:
+        return {
+            "type": "text",
+            "data": f"Hey {user['name']} 👋 How can I help you with your emails today?"
+        }
+
+    if "help" in msg or "what can you do" in msg:
+        return {
+            "type": "text",
+            "data": """Here’s what I can do:
+
+• Show your latest emails  
+• Show unread emails (Primary inbox only)  
+• Reply to an email  
+• Delete emails  
+• Summarize emails  
+
+Just tell me what you'd like to do."""
+        }
+
+    # =================================================
+    # 3️⃣ SHOW EMAILS
+    # =================================================
+    if "show" in msg or "unread" in msg:
+
+        if "unread" in msg:
+            data = await get_emails(request, unread=True)
+        else:
+            data = await get_emails(request)
+
+        emails = data["emails"]
+
+        request.session["last_emails"] = emails
+
+        return {
+            "type": "emails",
+            "data": emails
+        }
+
+    # =================================================
+    # 4️⃣ FETCH EMAILS (only if needed below)
+    # =================================================
     data = await get_emails(request)
     emails = data["emails"]
-
-    # store latest list in session
     request.session["last_emails"] = emails
 
-    # -------------------------
-    # Show Emails
-    # -------------------------
-    if "show" in msg:
-        return {"type": "emails", "data": emails}
-    
-    if "unread" in msg:
-        data = await get_emails(request, unread=True)
-        return {"type": "emails", "data": data["emails"]}
-
-    # --- SUMMARIZE FLOW ---
+    # =================================================
+    # 5️⃣ SUMMARIZE
+    # =================================================
     if "summarize" in msg:
-        email = find_email(emails, msg)
-
+        email = find_email(request, msg)
         if not email:
             return {"type": "text", "data": "Email not found."}
 
         msg_data = service.users().messages().get(
             userId="me",
-            id=email["id"],
+            id=email["id"]
         ).execute()
 
         content = extract_body(msg_data["payload"])
@@ -214,17 +202,17 @@ async def chat(request: Request):
 
         return {
             "type": "text",
-            "data": f"Summary of '{email['subject']}':\n\n{summary}",
+            "data": f"Summary of '{email['subject']}':\n\n{summary}"
         }
 
-    # -------------------------
-    # Delete Flow
-    # -------------------------
+    # =================================================
+    # 6️⃣ DELETE FLOW
+    # =================================================
     if "delete" in msg:
         email = find_email(request, msg)
         if not email:
             return {"type": "text", "data": "Email not found."}
-        
+
         request.session["last_selected_email"] = email
 
         request.session["pending_action"] = {
@@ -236,21 +224,20 @@ async def chat(request: Request):
             "type": "text",
             "data": f"""You are about to delete:
 
-            From: {email['from']}
-            Subject: {email['subject']}
+From: {email['from']}
+Subject: {email['subject']}
 
-            Type YES to confirm."""
+Type YES to confirm."""
         }
 
-    # -------------------------
-    # Reply Flow
-    # -------------------------
+    # =================================================
+    # 7️⃣ REPLY FLOW
+    # =================================================
     if "reply" in msg:
         email = find_email(request, msg)
         if not email:
             return {"type": "text", "data": "Email not found."}
 
-        # Fetch full message (for body + metadata)
         msg_data = service.users().messages().get(
             userId="me",
             id=email["id"],
@@ -262,11 +249,11 @@ async def chat(request: Request):
             "Message-ID"
         )
 
-        request.session["last_selected_email"] = email
-
         content = extract_body(msg_data["payload"])
         to_email = extract_email_address(email["from"])
         reply_text = generate_reply(content, user["name"])
+
+        request.session["last_selected_email"] = email
 
         request.session["pending_action"] = {
             "type": "reply",
@@ -284,33 +271,17 @@ async def chat(request: Request):
                 "reply": reply_text,
             },
         }
-    
-    # --------------------------
-    # Summarize
-    # --------------------------
-    if "summarize" in msg:
-        email = find_email(request, msg)
-        if not email:
-            return {"type": "text", "data": "Email not found."}
 
-        return {
-            "type": "text",
-            "data": f"Summary:\n\n{email['summary']}"
-        }
-
-    # -------------------------
-    # AI Intent Fallback
-    # -------------------------
+    # =================================================
+    # 8️⃣ AI INTENT FALLBACK
+    # =================================================
     intent = interpret_intent(msg)
 
     if intent == "show_emails":
-        return {"type": "emails", "data": emails}
-
-    if intent == "reply":
-        email = find_email(request, msg)
-        if email:
-            # trigger reply flow
-            msg = f"reply {emails.index(email)+1}"
+        return {
+            "type": "emails",
+            "data": emails
+        }
 
     if intent == "greeting":
         return {
@@ -321,10 +292,10 @@ async def chat(request: Request):
     if intent == "help":
         return {
             "type": "text",
-            "data": "You can ask me to show, reply, or delete emails."
+            "data": "You can ask me to show, reply, delete, or summarize emails."
         }
 
     return {
         "type": "text",
-        "data": "I'm not sure what you meant. Try saying 'show emails' or 'reply to email 1'."
+        "data": "I’m not sure what you meant. Try 'show emails' or 'reply to email 1'."
     }
