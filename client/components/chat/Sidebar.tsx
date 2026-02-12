@@ -24,6 +24,17 @@ export default function Sidebar() {
 
   useEffect(() => {
     fetchEmails();
+
+    // 🔥 Listen for refresh event from ChatWindow
+    const refreshHandler = () => {
+      fetchEmails();
+    };
+
+    window.addEventListener("refreshEmails", refreshHandler);
+
+    return () => {
+      window.removeEventListener("refreshEmails", refreshHandler);
+    };
   }, []);
 
   const deleteEmail = async (id: string) => {
@@ -34,7 +45,8 @@ export default function Sidebar() {
         credentials: "include",
       }
     );
-    fetchEmails(); // refresh after delete
+
+    fetchEmails(); // refresh after sidebar delete
   };
 
   return (
@@ -45,7 +57,6 @@ export default function Sidebar() {
       </div>
 
       <div className="space-y-4">
-        {/* Loading skeleton */}
         {loading &&
           [1, 2, 3, 4].map((i) => (
             <div
@@ -59,14 +70,12 @@ export default function Sidebar() {
             </div>
           ))}
 
-        {/* Empty state */}
         {!loading && emails.length === 0 && (
           <div className="text-neutral-500 text-sm">
             No emails found.
           </div>
         )}
 
-        {/* Emails */}
         {!loading &&
           emails.map((email, i) => (
             <div

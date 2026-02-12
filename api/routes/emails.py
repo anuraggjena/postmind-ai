@@ -1,5 +1,5 @@
 import os
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, Request
 from services.gmail_service import (
     get_gmail_service,
     get_header,
@@ -14,41 +14,34 @@ CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 
 
 @router.get("/api/emails")
-async def get_emails(request: Request, unread: bool = False):
-
+async def get_emails(request: Request):
     user = request.session.get("user")
-    if not user:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-
     service = get_gmail_service(user)
 
     res = service.users().messages().list(
         userId="me",
         maxResults=10,
-        q="in:inbox is:unread category:primary",
+        labelIds=["INBOX", "CATEGORY_UPDATES"],
     ).execute()
 
     output = []
 
     for msg in res.get("messages", []):
-        data = service.users().messages().get(
-            userId="me",
-            id=msg["id"]
-        ).execute()
-
+        data = service.users().messages().get(userId="me", id=msg["id"]).execute()
         headers = data["payload"]["headers"]
 
         subject = get_header(headers, "Subject", "(No Subject)")
         sender = get_header(headers, "From", "Unknown")
 
         body = extract_body(data["payload"])
+        summary = summarize_email(body)
 
         output.append(
             {
                 "id": msg["id"],
                 "subject": subject,
                 "from": sender,
-                "summary": body[:200],
+                "summary": summary,
             }
         )
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import MessageBubble from "./MessageBubble"
 import CommandInput from "./CommandInput"
 
@@ -8,6 +8,13 @@ export default function ChatWindow() {
   const [messages, setMessages] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [userName, setUserName] = useState("there")
+
+  const bottomRef = useRef<HTMLDivElement>(null)
+
+  // 🔹 Auto scroll whenever messages or loading changes
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [messages, loading])
 
   // Fetch user
   useEffect(() => {
@@ -31,7 +38,7 @@ export default function ChatWindow() {
 You can say:
 • show my emails
 • reply to email 1
-• delete email from amazon`,
+• delete email from <sender>`,
         time: Date.now(),
       },
     ])
@@ -64,6 +71,15 @@ You can say:
         time: Date.now(),
       },
     ])
+
+    // 🔥 Refresh sidebar if deleted
+    if (
+      data.type === "text" &&
+      typeof data.data === "string" &&
+      data.data.toLowerCase().includes("deleted")
+    ) {
+      window.dispatchEvent(new Event("refreshEmails"))
+    }
   }
 
   const handleAction = async (action: string) => {
@@ -90,6 +106,9 @@ You can say:
         {loading && (
           <div className="text-sm text-zinc-400">Thinking...</div>
         )}
+
+        {/* 🔹 Scroll Anchor */}
+        <div ref={bottomRef} />
       </div>
 
       <CommandInput onSend={sendMessage} loading={loading} />
