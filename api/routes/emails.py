@@ -21,11 +21,11 @@ async def get_emails(request: Request, unread: bool = False):
     query = None
 
     if unread:
-        query = "in: inbox is:unread category:updates"
+        query = "in: inbox is:unread category:primary"
 
     res = service.users().messages().list(
         userId="me",
-        maxResults=5,
+        maxResults=10,
         q = query,
     ).execute()
 
