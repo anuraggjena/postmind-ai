@@ -14,14 +14,19 @@ CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 
 
 @router.get("/api/emails")
-async def get_emails(request: Request):
+async def get_emails(request: Request, unread: bool = False):
     user = request.session.get("user")
     service = get_gmail_service(user)
+
+    query = None
+
+    if unread:
+        query = "in: inbox is:unread category:updates"
 
     res = service.users().messages().list(
         userId="me",
         maxResults=5,
-        labelIds=["INBOX", "CATEGORY_UPDATES"],
+        q = query,
     ).execute()
 
     output = []
